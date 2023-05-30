@@ -1,11 +1,20 @@
 {
   "name": "fullstack-3.1-series",
   "version": "0.0.1",
-  "description": "Fullstack tehtäväsarja alkaen tehtävästä 3.1.",
+  "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khan5ula/fullstack-3.1-series-kh.git"
+  },
   "author": "Kristian Hannula",
-  "license": "ISC"
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/khan5ula/fullstack-3.1-series-kh/issues"
+  },
+  "homepage": "https://github.com/khan5ula/fullstack-3.1-series-kh#readme"
 }
