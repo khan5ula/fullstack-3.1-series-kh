@@ -22,6 +22,7 @@
   "homepage": "https://github.com/khan5ula/fullstack-3.1-series-kh#readme",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^16.1.3",
     "express": "^4.18.2",
     "mongodb": "^5.6.0",
     "mongoose": "^7.2.2",
