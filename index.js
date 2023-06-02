@@ -99,15 +99,15 @@ app.post('/api/persons', (request, response) => {
         });
     }
 
-    const person = {
+    const person = new Person({
         id: generateId(),
         name: body.name,
         number: body.number,
-    }
+    })
 
-    console.log('Received: ' + body.name + body.number + ' ' + person.id)
-    persons = persons.concat(person)
-    response.json(person)
+    person.save().then(newPerson => {
+        response.json(newPerson)
+    })
 })
 
 const PORT = process.env.PORT
