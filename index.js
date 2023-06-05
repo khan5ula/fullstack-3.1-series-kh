@@ -112,6 +112,27 @@ app.post('/api/persons', (request, response, next) => {
         .catch(error => next(error))
 })
 
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+
+    const person = {
+        name: body.name,
+        number: body.number
+    }
+
+    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+        .then(updatedPerson => {
+            if (updatedPerson) {
+                response.json(updatedPerson)
+            } else {
+                const error = new Error('Person not found')
+                error.status = 404
+                next(error)
+            }
+        })
+        .catch(error => next(error))
+})
+
 app.use(unknownEndpoint)
 app.use(errorHandler)
 
