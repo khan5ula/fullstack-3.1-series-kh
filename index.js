@@ -11,13 +11,17 @@ const errorHandler = (error, request, response, next) => {
 
     if (error.name === 'CastError') {
         return response.status(400).send({ error: 'malformatted id' })
+    } else if (error.status) {
+        /* Show custom error message */
+        return response.status(error.status).send({ error: error.message })
     }
 
-    next(error)
+    /* Generic response for unknown errors */
+    response.status(500).send({ error: 'Something went wrong' })
 }
 
 const unknownEndpoint = (request, response) => {
-    response.status(404).send({ error: 'unknown endpoint' })
+    response.status(404).send({ error: 'Unknown endpoint' })
 }
 
 morgan.token('postContent', function (req) {
@@ -34,7 +38,6 @@ morgan.token('postContent', function (req) {
 app.use(express.json())
 app.use(cors())
 app.use(express.static('build'))
-app.use(errorHandler)
 
 app.use(morgan((tokens, req, res) => {
     return [
@@ -66,52 +69,51 @@ app.get('/api/persons/:id', (req, res, next) => {
 })
 
 app.get('/info', (req, res) => {
-    const count = persons.length
-    const date = new Date()
-    res.send(`Phonebook has info for ${count} people<br>${date}`)
+    Person.find({}).then(persons => {
+        const count = persons.length
+        const date = new Date()
+        res.send(`Phonebook has info for ${count} people<br>${date}`)
+    })
 })
+
 
 app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndRemove(request.params.id)
         .then(result => {
-            response.status(204).end()
+            if (result) {
+                response.status(204).end()
+            } else {
+                const error = new Error('Person not found')
+                error.status = 404
+                next(error)
+            }
         })
         .catch(error => next(error))
 })
 
-const generateId = () => {
-    const n = Math.max(...persons.map(person => person.id))
-    return Math.floor(Math.random() * (101 - n)) + n;
-}
-
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
     if (!body.name || !body.number) {
-        return response.status(400).json({
-            error: 'content missing'
-        })
-    }
-
-    const nameExists = persons.some(person => person.name === body.name);
-    if (nameExists) {
-        return response.status(400).json({
-            error: 'name must be unique'
-        });
+        const error = new Error('Content missing')
+        error.status = 400
+        return next(error)
     }
 
     const person = new Person({
-        id: generateId(),
         name: body.name,
         number: body.number,
     })
 
-    person.save().then(newPerson => {
-        response.json(newPerson)
-    })
+    person.save()
+        .then(newPerson => {
+            response.json(newPerson)
+        })
+        .catch(error => next(error))
 })
 
 app.use(unknownEndpoint)
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
